@@ -29,19 +29,19 @@ really a list containing a function to
 
 <!-- -->
 
-    makeVector <- function(x = numeric()) {
-            m <- NULL
-            set <- function(y) {
-                    x <<- y
-                    m <<- NULL
-            }
-            get <- function() x
-            setmean <- function(mean) m <<- mean
-            getmean <- function() m
-            list(set = set, get = get,
-                 setmean = setmean,
-                 getmean = getmean)
-    }
+makeVector <- function(x = numeric()) {
+m <- NULL
+set <- function(y) {
+x <<- y
+m <<- NULL
+}
+get <- function() x
+setmean <- function(mean) m <<- mean
+getmean <- function() m
+list(set = set, get = get,
+setmean = setmean,
+getmean = getmean)
+}
 
 The following function calculates the mean of the special "vector"
 created with the above function. However, it first checks to see if the
@@ -50,56 +50,86 @@ cache and skips the computation. Otherwise, it calculates the mean of
 the data and sets the value of the mean in the cache via the `setmean`
 function.
 
-    cachemean <- function(x, ...) {
-            m <- x$getmean()
-            if(!is.null(m)) {
-                    message("getting cached data")
-                    return(m)
-            }
-            data <- x$get()
-            m <- mean(data, ...)
-            x$setmean(m)
-            m
-    }
+cachemean <- function(x, ...) {
+m <- x$getmean()
+if(!is.null(m)) {
+message("getting cached data")
+return(m)
+}
+data <- x$get()
+m <- mean(data, ...)
+x$setmean(m)
+m
+}
 
 ### Assignment: Caching the Inverse of a Matrix
 
-Matrix inversion is usually a costly computation and there may be some
-benefit to caching the inverse of a matrix rather than computing it
-repeatedly (there are also alternatives to matrix inversion that we will
-not discuss here). Your assignment is to write a pair of functions that
-cache the inverse of a matrix.
 
-Write the following functions:
 
-1.  `makeCacheMatrix`: This function creates a special "matrix" object
-    that can cache its inverse.
-2.  `cacheSolve`: This function computes the inverse of the special
-    "matrix" returned by `makeCacheMatrix` above. If the inverse has
-    already been calculated (and the matrix has not changed), then
-    `cacheSolve` should retrieve the inverse from the cache.
+`makeCacheMatrix` - In addition to setter/getters , it uses a matequal()
+function to check if a new matrix is being set, if so it sets the matrix inverse
+to NULL. This forces a NULL for matrix inverse , which results in a new inverse
+computation.
 
-Computing the inverse of a square matrix can be done with the `solve`
-function in R. For example, if `X` is a square invertible matrix, then
-`solve(X)` returns its inverse.
+makeCacheMatrix <- function(x = matrix()) {
 
-For this assignment, assume that the matrix supplied is always
-invertible.
+matrixinverse <- NULL  
+## Setter for matrix 
+set <- function(y) {
+if (!matequal(x,y)){
+message("overriding  previously stored matrix with new argument matrix, \
+new inverse will be computed")
+x <<- y
+matrixinverse <<- NULL 
+} else {            
+}
+}
 
-In order to complete this assignment, you must do the following:
+## Getter for matrix 
+get <- function() x
 
-1.  Fork the GitHub repository containing the stub R files at
-    [https://github.com/rdpeng/ProgrammingAssignment2](https://github.com/rdpeng/ProgrammingAssignment2)
-    to create a copy under your own account.
-2.  Clone your forked GitHub repository to your computer so that you can
-    edit the files locally on your own machine.
-3.  Edit the R file contained in the git repository and place your
-    solution in that file (please do not rename the file).
-4.  Commit your completed R file into YOUR git repository and push your
-    git branch to the GitHub repository under your account.
-5.  Submit to Coursera the URL to your GitHub repository that contains
-    the completed R code for the assignment.
+## Setter for setting matrix inverse 
+setinverse <- function(inverse) matrixinverse <<- inverse
 
-### Grading
+## Getter for getting matrix inverse
+getinverse <- function() matrixinverse
 
-This assignment will be graded via peer assessment.
+## Check if two matrices are equal 
+matequal <- function(x, y)
+is.matrix(x) && is.matrix(y) && dim(x) == dim(y) && all(x == y)
+
+list(set = set, get = get,
+setinverse = setinverse,
+getinverse = getinverse)
+}
+
+
+cacheSolve - Uses isinvertible to check if the new matrix can be inverted
+
+
+cacheSolve <- function(x, ...) {
+
+## Helper to check if the matrix is invertible
+ismatrixinvertible <- function(m) class(try(solve(m),silent=T))=="matrix"
+matrix <- x$get()
+
+## Return a matrix that is the inverse of 'x'
+inverse <- x$getinverse()
+if(!is.null(inverse)) {
+message("getting cached inverse matrix data")
+return(inverse)
+} 
+
+if (ismatrixinvertible(matrix)){
+message("computing matrix inverse")
+inverse <- solve(matrix)
+} else {
+message("matrix cannot be invertible")
+return
+}
+x$setinverse(inverse)
+inverse
+}
+
+
+Please check `output.txt` for sample run output
