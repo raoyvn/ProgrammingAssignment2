@@ -1,0 +1,26 @@
+> source('~/Downloads/coursera/R/Week 3/ProgrammingAssignment2/cachematrix.R')
+> x
+     [,1] [,2]
+[1,]    2    4
+[2,]    3    5
+> cm <-makeCacheMatrix(x)
+> cacheSolve(cm)
+computing matrix inverse
+     [,1] [,2]
+[1,] -2.5    2
+[2,]  1.5   -1
+> cacheSolve(cm)
+getting cached inverse matrix data
+     [,1] [,2]
+[1,] -2.5    2
+[2,]  1.5   -1
+> x <- matrix(1:4,2)
+> cm$set(x)
+overriding  previously stored matrix with new argument matrix, 
+                    new inverse will be computed
+> cacheSolve(cm)
+computing matrix inverse
+     [,1] [,2]
+[1,]   -2  1.5
+[2,]    1 -0.5
+> 
